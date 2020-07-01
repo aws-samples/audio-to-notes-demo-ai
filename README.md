@@ -7,3 +7,8 @@ A demonstrantion using Amazon Textextract and Amazon polly to extract text of fi
 <p align="center"> 
 <img src="images/ai_diagram_webinar.png">
 </p>
+
+## TODO
+
+- Create the bucket for lambda code.
+- Create ECS structure in Cloudformation

@@ -5,7 +5,7 @@ A demonstrantion using Amazon Textextract and Amazon polly to extract text of im
 # Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
+- [Docker Compose](https://docs.docker.com/compose/install/) - Only to run web app locally
 - [awscli](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
 - [Pre configured AWS credentials](https://docs.aws.amazon.com/amazonswf/latest/awsrbflowguide/set-up-creds.html)
 - [Pre configured VPC with at minimun 2 public subnets]()
@@ -67,11 +67,13 @@ aws cloudformation create-stack --stack-name audio-notes-ecs --template-body fil
 ```
 
 
-## How our application works
+# How our application works
 
 Access the DNS address of the ELB provisioned by our Cloudformation.
 
-## TODO
+# Clean up
+
+# TODO
 
 - Instructions of how to upload Docker image to ECS Registry
 - Add VPC with public subnets pre-req and reference to a source repository

@@ -133,7 +133,7 @@ Resources:
 
 Outputs:
   BucketName: 
-    Description: "S3 bucket name"
+    Description: "S3 bucket name that will store our image and audio files"
     Value: 
       Ref: s3Bucket
 # Add more outputs to the stack

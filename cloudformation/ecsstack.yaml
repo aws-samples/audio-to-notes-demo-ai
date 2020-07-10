@@ -199,5 +199,10 @@ Resources:
         - ContainerName: !Ref 'ServiceName'
           ContainerPort: 5000
           TargetGroupArn: !Ref 'TargetGroup'
+  
+Outputs:
+  AlbDNS: 
+    Description: "ALB DNS name that will give access to our application"
+    Value: !GetAtt PythonAppAlb.DNSName
 
   

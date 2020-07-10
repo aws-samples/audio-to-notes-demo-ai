@@ -61,4 +61,5 @@ Access the DNS address of the ELB provisioned by our Cloudformation.
 
 ## TODO
 
-- Create ECS structure in Cloudformation and Output ELB.
+- Instructions of how to upload Docker image to ECS Registry
+- Add VPC with public subnets pre-req and reference to a source repository

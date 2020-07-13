@@ -123,11 +123,17 @@ Resources:
       FunctionName: !Ref LambdaTextract
       Qualifier: $LATEST
 
+  # ECR Repository to upload Docker Image of our application
+  ECRRepository:
+    Type: AWS::ECR::Repository
+    Properties: 
+      RepositoryName: python-polly-textract
+
 # TODO: Create VPC and ECS Cluster configurations.
 
 Outputs:
-  QueueURL: 
-    Description: "S3 bucket name"
+  BucketName: 
+    Description: "S3 bucket name that will store our image and audio files"
     Value: 
       Ref: s3Bucket
 # Add more outputs to the stack

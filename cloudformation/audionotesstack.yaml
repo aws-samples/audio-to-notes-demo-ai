@@ -136,4 +136,7 @@ Outputs:
     Description: "S3 bucket name that will store our image and audio files"
     Value: 
       Ref: s3Bucket
+  ECRRepositoryArn: 
+    Description: "The ARN of our ECR repository to host out Docker images"
+    Value: !GetAtt ECRRepository.Arn
 # Add more outputs to the stack

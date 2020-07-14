@@ -1,0 +1,142 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Stack to provision complete rekognition
+
+Parameters:
+  BucketName:
+    Description: The S3 bucket name to upload images
+    Type: String
+    Default: audio-notes-changeme
+  BucketLambdaCode:
+    Description: The S3 bucket where you store your lambda code
+    Type: String
+    Default: ai-services-for-demo
+
+
+Resources:
+# Lambda Role for Textract
+  LambdaTextractRole:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonTextractFullAccess
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AWSLambdaFullAccess
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+
+# Lambda function that will trigger textract
+  LambdaTextract:
+    Type: AWS::Lambda::Function
+    DependsOn:
+      - LambdaTextractRole
+    Properties:
+      Code:
+        S3Bucket: !Ref BucketLambdaCode
+        S3Key: lambda/lambda_textract.zip
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt LambdaTextractRole.Arn
+      Runtime: python3.7
+      Timeout: 10
+      MemorySize: 512
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref BucketName
+
+  # S3 that trigger lambda function when a new object is uploaded
+  s3Bucket:
+      DependsOn: 
+        - LambdaTextract
+      Type: AWS::S3::Bucket
+      Properties: 
+        AccessControl: Private
+        BucketName: !Ref BucketName
+        NotificationConfiguration:
+          LambdaConfigurations:
+            - Event: s3:ObjectCreated:*
+              Function: !GetAtt LambdaTextract.Arn
+              Filter:
+                  S3Key: # Filter just the necessary to trigger the lambda Function
+                      Rules:
+                        - Name: prefix
+                          Value: textract_input/
+
+  # Giving permission to S3 invoke the lambda function
+  BucketPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref LambdaTextract
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref AWS::AccountId
+      SourceArn: !Sub arn:aws:s3:::${BucketName}
+
+  # Lambda role to transform text to speech using Polly
+  LambdaPollyRole:
+      Type: AWS::IAM::Role
+      Properties:
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AmazonPollyFullAccess
+          - arn:aws:iam::aws:policy/AmazonS3FullAccess
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - lambda.amazonaws.com
+            Action:
+            - sts:AssumeRole
+
+  LambdaPolly:
+    Type: AWS::Lambda::Function
+    DependsOn:
+        - LambdaPollyRole
+    Properties:
+      Code:
+        S3Bucket: !Ref BucketLambdaCode
+        S3Key: lambda/lambda_polly.zip
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt LambdaPollyRole.Arn
+      Runtime: python3.7
+      Timeout: 10
+      MemorySize: 512
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref s3Bucket
+  
+  # Add lambda destination to TextractLambda Trigger Polly Lambda
+  DestinationTextractToPolly:        
+    Type: AWS::Lambda::EventInvokeConfig
+    Properties: 
+      DestinationConfig: 
+        OnSuccess: 
+          Destination: !GetAtt LambdaPolly.Arn
+      FunctionName: !Ref LambdaTextract
+      Qualifier: $LATEST
+
+  # ECR Repository to upload Docker Image of our application
+  ECRRepository:
+    Type: AWS::ECR::Repository
+    Properties: 
+      RepositoryName: python-polly-textract
+
+# TODO: Create VPC and ECS Cluster configurations.
+
+Outputs:
+  BucketName: 
+    Description: "S3 bucket name that will store our image and audio files"
+    Value: 
+      Ref: s3Bucket
+  ECRRepositoryArn: 
+    Description: "The ARN of our ECR repository to host out Docker images"
+    Value: !GetAtt ECRRepository.Arn
+# Add more outputs to the stack

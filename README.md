@@ -1,4 +1,4 @@
-# audio-notes-demo
+#  audio-to-notes-demo-ai
 
 This is a demonstrantion of using [Amazon Textextract](https://aws.amazon.com/textract/) and [Amazon polly](https://aws.amazon.com/polly/) to extract text from images and generate audio files from it, allowing you to hear it later.
 
@@ -157,3 +157,12 @@ aws cloudformation delete-stack --stack-name audio-notes-ecs
 ```shell
 aws s3 rb s3://<MY_BUCKET_NAME> --force
 ```
+
+## Security
+
+See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+
+## License
+
+This library is licensed under the MIT-0 License. See the LICENSE file.
+
